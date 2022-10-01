@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SupplierCompilation.SONSAB.Core.Dtos
 {
-    internal class CompanyInfoBasisDto
+    public class CompanyInfoBasisDto
     {
         public string VatNumber { get; set; }
         public string ContryCode { get; set; }

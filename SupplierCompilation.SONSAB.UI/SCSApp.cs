@@ -81,7 +81,14 @@ namespace SupplierCompilation.SONSAB.UI
                 Console.WriteLine("Running service...");
                 var serviceOne = new AppService();
                 serviceOne.SetColumn(column);
-                serviceOne.ProcessFile(@"c:\tmp\FT.xlsx");
+                try
+                {
+                    serviceOne.ProcessFile(@"c:\tmp\FT.lev.xlsx");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
                 return;
             }
 
