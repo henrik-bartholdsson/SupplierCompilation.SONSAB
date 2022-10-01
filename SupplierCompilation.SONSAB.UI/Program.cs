@@ -1,2 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+using SupplierCompilation.SONSAB.UI;
+
+
+
+var app = new SCSApp();
+
+app.Run();
