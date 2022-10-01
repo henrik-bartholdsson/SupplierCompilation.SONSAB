@@ -83,6 +83,7 @@ namespace SupplierCompilation.SONSAB.Core.Services
 
                     cellRange.Value = new String("invalid VAT");
                     workBook.Save();
+                    continue;
                 }
 
                 cellRange.Value = new String("no VAT");
