@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SupplierCompilation.SONSAB.Core.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -78,6 +79,9 @@ namespace SupplierCompilation.SONSAB.UI
             if (input.Key == ConsoleKey.Enter)
             {
                 Console.WriteLine("Running service...");
+                var serviceOne = new AppService();
+                serviceOne.SetColumn(column);
+                serviceOne.ProcessFile(@"c:\tmp\FT.xlsx");
                 return;
             }
 
