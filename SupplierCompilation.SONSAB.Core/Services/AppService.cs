@@ -37,15 +37,16 @@ namespace SupplierCompilation.SONSAB.Core.Services
             string vatColumn = GetLastColumn(worksheet, 1);
             string nameColumn = GetLastColumn(worksheet, 2);
             string addressColumn = GetLastColumn(worksheet, 3);
+            string secondAddressColumn = GetLastColumn(worksheet, 4);
 
-            Range vatTitle = worksheet.Range[$"{vatColumn}{1}:{vatColumn}{1}"];
-            Range nameTitle = worksheet.Range[$"{nameColumn}{1}:{nameColumn}{1}"];
-            Range adressTitle = worksheet.Range[$"{addressColumn}{1}:{addressColumn}{1}"];
+            List<string> columns = new List<string>();
+            columns.Add(vatColumn);
+            columns.Add(nameColumn);
+            columns.Add(addressColumn);
+            columns.Add(secondAddressColumn);
+            SetTitles(workBook, worksheet, columns);
 
-            vatTitle.Value = "New Vat number";
-            nameTitle.Value = "New Company Name";
-            adressTitle.Value = "New Address";
-            workBook.Save();
+
 
 
             Range cells = worksheet.Range[$"{column}1:{column}{lastUsedRow}"];
@@ -113,6 +114,18 @@ namespace SupplierCompilation.SONSAB.Core.Services
             }
 
             return columnName;
+        }
+
+        private void SetTitles(Workbook workBook, dynamic? worksheet, List<string> columns)
+        {
+            Range vatTitle = worksheet.Range[$"{columns[0]}{1}:{columns[0]}{1}"];
+            Range nameTitle = worksheet.Range[$"{columns[1]}{1}:{columns[1]}{1}"];
+            Range adressTitle = worksheet.Range[$"{columns[2]}{1}:{columns[2]}{1}"];
+
+            vatTitle.Value = "New Vat number";
+            nameTitle.Value = "New Company Name";
+            adressTitle.Value = "New Address";
+            workBook.Save();
         }
 
         public void SetColumn(string column)

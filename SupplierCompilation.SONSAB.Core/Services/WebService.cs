@@ -1,5 +1,4 @@
 ﻿using RestSharp;
-using SupplierCompilation.SONSAB.Core.Configurations;
 using SupplierCompilation.SONSAB.Core.Dtos;
 using System.Xml;
 
