@@ -1,5 +1,7 @@
-﻿using RestSharp;
+﻿using Microsoft.Office.Interop.Excel;
+using RestSharp;
 using SupplierCompilation.SONSAB.Core.Dtos;
+using System.Net;
 using System.Xml;
 
 namespace SupplierCompilation.SONSAB.Core.Services
@@ -26,24 +28,34 @@ namespace SupplierCompilation.SONSAB.Core.Services
 
             xmlDoc.LoadXml(response.Content);
 
-            try
+            var returnObject = new CompanyInfoResponseDto { IsValid = "false" };
+
+            if (xmlDoc.GetElementsByTagName("ns2:name").Count > 0)
             {
-                return new CompanyInfoResponseDto
-                {
-                    Name = xmlDoc.GetElementsByTagName("ns2:name")[0].InnerText,
-                    Address = xmlDoc.GetElementsByTagName("ns2:address")[0].InnerText,
-                    VatNumber = xmlDoc.GetElementsByTagName("ns2:vatNumber")[0].InnerText,
-                    IsValid = xmlDoc.GetElementsByTagName("ns2:valid")[0].InnerText,
-                    ContryCode = xmlDoc.GetElementsByTagName("ns2:countryCode")[0].InnerText,
-                };
+                returnObject.Name = xmlDoc.GetElementsByTagName("ns2:name")[0].InnerText;
             }
-            catch (Exception)
+
+            if (xmlDoc.GetElementsByTagName("ns2:address").Count > 0)
             {
-                return new CompanyInfoResponseDto
-                {
-                    IsValid = "false",
-                };
+                returnObject.Address = xmlDoc.GetElementsByTagName("ns2:address")[0].InnerText;
             }
+
+            if (xmlDoc.GetElementsByTagName("ns2:vatNumber").Count > 0)
+            {
+                returnObject.VatNumber = xmlDoc.GetElementsByTagName("ns2:vatNumber")[0].InnerText;
+            }
+
+            if (xmlDoc.GetElementsByTagName("ns2:valid").Count > 0)
+            {
+                returnObject.IsValid = xmlDoc.GetElementsByTagName("ns2:valid")[0].InnerText;
+            }
+
+            if (xmlDoc.GetElementsByTagName("ns2:countryCode").Count > 0)
+            {
+                returnObject.ContryCode = xmlDoc.GetElementsByTagName("ns2:countryCode")[0].InnerText;
+            }
+
+            return returnObject;
 
         }
 

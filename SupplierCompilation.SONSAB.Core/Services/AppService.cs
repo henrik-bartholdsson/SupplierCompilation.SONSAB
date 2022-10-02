@@ -49,12 +49,7 @@ namespace SupplierCompilation.SONSAB.Core.Services
 
             Range cells = worksheet.Range[$"{column}1:{column}{lastUsedRow}"];
 
-            Range altCountryCode;
 
-            if(String.IsNullOrEmpty(alternativeCountryCode) == false)
-            {
-                altCountryCode = worksheet.Range[$"{alternativeCountryCode}1:{column}{alternativeCountryCode}"];
-            }
 
             Console.Clear();
             Console.SetCursorPosition(0, 1);
@@ -73,17 +68,45 @@ namespace SupplierCompilation.SONSAB.Core.Services
                 Range nameCell = worksheet.Range[$"{nameColumn}{i}:{nameColumn}{i}"];
                 Range addressCell = worksheet.Range[$"{addressColumn}{i}:{addressColumn}{i}"];
 
-                if (!String.IsNullOrEmpty(vatNumber) && !String.IsNullOrEmpty(vatCc))
+                if (String.IsNullOrEmpty(vatNumber) == false)
                 {
-                    var resp = _webService.SendRequest(vatCc, vatNumber).Result;
-
-                    if (resp.IsValid != "false")
+                    if("0696840" == vatNumber)
                     {
-                        vatCell.Value = resp.ContryCode + resp.VatNumber;
-                        nameCell.Value = resp.Name;
-                        addressCell.Value = resp.Address;
-                        workBook.Save();
-                        continue;
+                        var asdasdasd = 98;
+                    }
+                    if(String.IsNullOrEmpty(vatCc) == false)
+                    {
+                        var resp = _webService.SendRequest(vatCc, vatNumber).Result;
+
+                        if (resp.IsValid != "false")
+                        {
+                            vatCell.Value = resp.ContryCode + resp.VatNumber;
+                            nameCell.Value = resp.Name;
+                            addressCell.Value = resp.Address;
+                            workBook.Save();
+                            continue;
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(alternativeCountryCode) == false)
+                    {
+                        Range altCountryCode;
+                        altCountryCode = worksheet.Range[$"{alternativeCountryCode}{i}:{alternativeCountryCode}{i}"];
+                        var altCc = worksheet.Range[$"{alternativeCountryCode}{i}:{alternativeCountryCode}{i}"].Value;
+
+                        if (vatCc != altCc)
+                        {
+                            var resp = _webService.SendRequest(altCc, vatNumber).Result;
+
+                            if (resp.IsValid != "false")
+                            {
+                                vatCell.Value = resp.ContryCode + resp.VatNumber;
+                                nameCell.Value = resp.Name;
+                                addressCell.Value = resp.Address;
+                                workBook.Save();
+                                continue;
+                            }
+                        }
                     }
 
                     vatCell.Value = new String("invalid VAT");
@@ -115,7 +138,7 @@ namespace SupplierCompilation.SONSAB.Core.Services
             string columnName = String.Empty;
             while (lastUsedColumn > 0)
             {
-                int modulo = (lastUsedColumn -1) % 26;
+                int modulo = (lastUsedColumn - 1) % 26;
                 columnName = Convert.ToChar('A' + modulo) + columnName;
                 lastUsedColumn = (lastUsedColumn - modulo) / 26;
             }
