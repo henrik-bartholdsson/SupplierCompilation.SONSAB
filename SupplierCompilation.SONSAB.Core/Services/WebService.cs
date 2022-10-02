@@ -7,34 +7,24 @@ namespace SupplierCompilation.SONSAB.Core.Services
 {
     public class WebService : IWebService
     {
-        WebServiceConfig _config;
-        public WebService(WebServiceConfig config)
-        {
-            _config = config;
-        }
+        RestClient _restClient;
 
         public WebService()
         {
-
+            _restClient = new RestClient("http://ec.europa.eu/taxation_customs/vies/services/checkVatService/");
         }
 
         public async Task<CompanyInfoResponseDto> SendRequest(string contryCode, string VatNumber)
         {
-            var client = new RestClient("http://ec.europa.eu/taxation_customs/vies/services/checkVatService/");
-
-            var request = new RestRequest("", Method.Post);
-            request.AddHeader("Content-Type", "text/xml; charset=utf-8");
-            request.AddHeader("Content-Length", "<calculated when request is sent>");
-            request.AddHeader("User-Agent", "PostmanRuntime/7.29.2");
-            request.AddHeader("Accrept", "*/*");
-            request.AddHeader("Accept-Encoding", "gzip, deflate, br");
-            request.AddHeader("Connection", "keep-alive");
+            var request = GetRequest();
 
             var body = GetRequestBody(VatNumber, contryCode);
 
-            request.AddParameter("text/xml", body, ParameterType.RequestBody);
+            request.AddBody(body);
 
-            var response = await client.ExecuteAsync(request);
+            //request.AddParameter("text/xml", body, ParameterType.RequestBody);
+
+            var response = await _restClient.ExecuteAsync(request);
             var xmlDoc = new XmlDocument();
 
             xmlDoc.LoadXml(response.Content);
@@ -94,7 +84,19 @@ namespace SupplierCompilation.SONSAB.Core.Services
             @"  </soap:Body>" + "\n" +
             @"</soap:Envelope>" + "\n" +
             @"";
-            
+        }
+
+        private RestRequest GetRequest()
+        {
+            var request = new RestRequest("", Method.Post);
+            request.AddHeader("Content-Type", "text/xml; charset=utf-8");
+            request.AddHeader("Content-Length", "<calculated when request is sent>");
+            request.AddHeader("User-Agent", "PostmanRuntime/7.29.2");
+            request.AddHeader("Accrept", "*/*");
+            request.AddHeader("Accept-Encoding", "gzip, deflate, br");
+            request.AddHeader("Connection", "keep-alive");
+
+            return request;
         }
     }
 }

@@ -9,9 +9,10 @@ namespace SupplierCompilation.SONSAB.UI
 {
     internal class SCSApp
     {
+        AppService _appService;
         public SCSApp()
         {
-            
+            _appService = new AppService();
         }
 
         public void Run()
@@ -79,11 +80,11 @@ namespace SupplierCompilation.SONSAB.UI
             if (input.Key == ConsoleKey.Enter)
             {
                 Console.WriteLine("Running service...");
-                var serviceOne = new AppService();
-                serviceOne.SetColumn(column);
+
+                _appService.SetColumn(column);
                 try
                 {
-                    serviceOne.ProcessFile(@"c:\tmp\FT.lev.xlsx");
+                    _appService.ProcessFile(@"c:\tmp\FT.lev.xlsx");
                 }
                 catch (Exception ex)
                 {
