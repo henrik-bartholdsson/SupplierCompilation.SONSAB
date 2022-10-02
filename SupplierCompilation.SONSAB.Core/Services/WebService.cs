@@ -22,34 +22,10 @@ namespace SupplierCompilation.SONSAB.Core.Services
 
             request.AddBody(body);
 
-            //request.AddParameter("text/xml", body, ParameterType.RequestBody);
-
             var response = await _restClient.ExecuteAsync(request);
             var xmlDoc = new XmlDocument();
 
             xmlDoc.LoadXml(response.Content);
-
-            // Kolla om det finns en error tag.
-
-            try
-            {
-                var isValid = xmlDoc.GetElementsByTagName("ns2:valid")[0].InnerText;
-
-                if (isValid == "false")
-                {
-                    return new CompanyInfoResponseDto
-                    {
-                        IsValid = xmlDoc.GetElementsByTagName("ns2:valid")[0].InnerText,
-                    };
-                }
-            }
-            catch (Exception)
-            {
-                return new CompanyInfoResponseDto
-                {
-                    IsValid = "false",
-                };
-            }
 
             try
             {
