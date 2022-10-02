@@ -31,7 +31,9 @@ namespace SupplierCompilation.SONSAB.Core.Services
                 throw new Exception("Error, file not found. Path: " + filePath);
             }
 
-            var workBook = excel.Workbooks.Open(filePath);
+            var applicationPath = Directory.GetCurrentDirectory();
+
+            var workBook = excel.Workbooks.Open(applicationPath + "\\" + filePath);
             var worksheet = workBook.Worksheets[1];
 
             var lastUsedRow = GetLastRow(worksheet);
@@ -70,10 +72,6 @@ namespace SupplierCompilation.SONSAB.Core.Services
 
                 if (String.IsNullOrEmpty(vatNumber) == false)
                 {
-                    if("0696840" == vatNumber)
-                    {
-                        var asdasdasd = 98;
-                    }
                     if(String.IsNullOrEmpty(vatCc) == false)
                     {
                         var resp = _webService.SendRequest(vatCc, vatNumber).Result;
@@ -117,6 +115,8 @@ namespace SupplierCompilation.SONSAB.Core.Services
                 vatCell.Value = new String("no VAT");
                 workBook.Save();
             }
+
+            workBook.Close();
         }
 
         private int GetLastRow(dynamic? worksheet)

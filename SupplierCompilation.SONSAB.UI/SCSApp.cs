@@ -33,6 +33,11 @@ namespace SupplierCompilation.SONSAB.UI
 
                 if (input.Key == ConsoleKey.F3)
                     return;
+
+                if (input.Key == ConsoleKey.F6)
+                {
+                    HelpSection();
+                }
             }
         }
 
@@ -47,10 +52,23 @@ namespace SupplierCompilation.SONSAB.UI
             Console.WriteLine("2. Fråga enskilt Vat nr");
             Console.SetCursorPosition(1, 25);
             Console.WriteLine("[F3] för att avsluta");
-            Console.SetCursorPosition(1, 12);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Fil sorce.xlsx hittad");
+            Console.SetCursorPosition(27, 25);
+            Console.WriteLine("[F6] för hjälp");
+            Console.SetCursorPosition(0, 23);
+            Console.WriteLine("=====================================================");
+            Console.SetCursorPosition(1, 22);
+            if(File.Exists("supplier.xlsx"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Fil supplier.xlsx hittad");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Kan ej hitta fil.");
+            }
             Console.ResetColor();
+            Console.SetCursorPosition(0, 26);
         }
 
         private void PrintSecondMenu()
@@ -92,17 +110,30 @@ namespace SupplierCompilation.SONSAB.UI
                 Console.WriteLine("Du valde kolumn " + countryCode + " för alternativ landskod.");
             }
 
+            Console.SetCursorPosition(1, 10);
+            Console.WriteLine("Tryck Enter för att starta körningen, eller F3 för att återgå.");
+
             var input = Console.ReadKey();
 
             if (input.Key == ConsoleKey.Enter)
             {
+                if(!File.Exists("supplier.xlsx"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(" Kan ej hitta fil!");
+                    Console.ResetColor();
+                    Console.WriteLine(" Tryck enter för att börja om.");
+                    Console.ReadKey();
+                    return;
+                }
                 Console.WriteLine("Running service...");
 
                 _appService.SetColumn(column);
                 _appService.AlternativeCountryCode(countryCode);
+                
                 try
                 {
-                    _appService.ProcessFile(@"c:\tmp\FT.lev.xlsx");
+                    _appService.ProcessFile("supplier.xlsx");
                 }
                 catch (Exception ex)
                 {
@@ -113,6 +144,33 @@ namespace SupplierCompilation.SONSAB.UI
 
             if (input.Key == ConsoleKey.F3)
                 return;
+
+            if(input.Key == ConsoleKey.F6)
+            {
+                HelpSection();
+            }
+        }
+
+        private void HelpSection()
+        {
+            Console.Clear();
+            Console.WriteLine();
+            Console.WriteLine("==== Hjälpavsnitt ====");
+            Console.WriteLine();
+            Console.WriteLine(" Excel-filen som ska bearbetas måste ligga i samma mapp som programmet.");
+            Console.WriteLine(" Filen måste ha namnet supplier.xlsx");
+            Console.WriteLine("");
+            Console.WriteLine(" När filen ska bearbetas måste en kolumn som innhåller de troliga VAT-nummren anges.");
+            Console.WriteLine("");
+            Console.WriteLine(" En alternativ kolum för landskod kan anges, detta kan underlätta vid uppslag mot web-tjänsten.");
+            Console.WriteLine("");
+            Console.WriteLine("");
+            Console.WriteLine(" Resultatet av körningen kommer läggas i de kolumner efter de avslutande.");
+            Console.WriteLine("");
+            Console.WriteLine("");
+            Console.WriteLine("");
+            Console.WriteLine(" Tryck på valfri tangent för att återgå...");
+            Console.ReadKey();
         }
     }
 }
