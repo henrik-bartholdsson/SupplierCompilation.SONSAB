@@ -25,22 +25,13 @@ namespace SupplierCompilation.SONSAB.Core.Services
             var request = new RestRequest("", Method.Post);
             request.AddHeader("Content-Type", "text/xml; charset=utf-8");
             request.AddHeader("Content-Length", "<calculated when request is sent>");
-            //request.AddHeader("Host", "<calculated when request is sent>");
             request.AddHeader("User-Agent", "PostmanRuntime/7.29.2");
             request.AddHeader("Accrept", "*/*");
             request.AddHeader("Accept-Encoding", "gzip, deflate, br");
             request.AddHeader("Connection", "keep-alive");
 
-            var body = @"<?xml version=""1.0"" encoding=""utf-8""?>" + "\n" +
-            @"<soap:Envelope xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">" + "\n" +
-            @"  <soap:Body>" + "\n" +
-            @"    <checkVat xmlns=""urn:ec.europa.eu:taxud:vies:services:checkVat:types"">" + "\n" +
-            $@"      <countryCode>{contryCode}</countryCode>" + "\n" +
-            $@"      <vatNumber>{VatNumber}</vatNumber>" + "\n" +
-            @"    </checkVat>" + "\n" +
-            @"  </soap:Body>" + "\n" +
-            @"</soap:Envelope>" + "\n" +
-            @"";
+            var body = GetRequestBody(VatNumber, contryCode);
+
             request.AddParameter("text/xml", body, ParameterType.RequestBody);
 
             var response = await client.ExecuteAsync(request);
@@ -89,6 +80,21 @@ namespace SupplierCompilation.SONSAB.Core.Services
                 };
             }
 
+        }
+
+        private string GetRequestBody(string VatNumber, string contryCode)
+        {
+            return @"<?xml version=""1.0"" encoding=""utf-8""?>" + "\n" +
+            @"<soap:Envelope xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">" + "\n" +
+            @"  <soap:Body>" + "\n" +
+            @"    <checkVat xmlns=""urn:ec.europa.eu:taxud:vies:services:checkVat:types"">" + "\n" +
+            $@"      <countryCode>{contryCode}</countryCode>" + "\n" +
+            $@"      <vatNumber>{VatNumber}</vatNumber>" + "\n" +
+            @"    </checkVat>" + "\n" +
+            @"  </soap:Body>" + "\n" +
+            @"</soap:Envelope>" + "\n" +
+            @"";
+            
         }
     }
 }
