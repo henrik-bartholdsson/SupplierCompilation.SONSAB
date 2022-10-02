@@ -17,7 +17,7 @@ namespace SupplierCompilation.SONSAB.UI
 
         public void Run()
         {
-            while(true)
+            while (true)
             {
                 PrintMenu();
                 var input = Console.ReadKey();
@@ -45,7 +45,7 @@ namespace SupplierCompilation.SONSAB.UI
             Console.WriteLine("1. Processa Fil");
             Console.SetCursorPosition(1, 5);
             Console.WriteLine("2. Fråga enskilt Vat nr");
-            Console.SetCursorPosition(1, 8);
+            Console.SetCursorPosition(1, 25);
             Console.WriteLine("[F3] för att avsluta");
             Console.SetCursorPosition(1, 12);
             Console.ForegroundColor = ConsoleColor.Green;
@@ -55,12 +55,23 @@ namespace SupplierCompilation.SONSAB.UI
 
         private void PrintSecondMenu()
         {
+            Console.Clear();
+            Console.SetCursorPosition(0, 1);
+            Console.WriteLine("========== Sonsab Supplier Compilator 1.0 ==========");
+            Console.SetCursorPosition(1, 25);
+            Console.WriteLine("[F3] för att avsluta");
             Console.SetCursorPosition(1, 3);
-            Console.Write("Välj column för Vat:");
-            Console.SetCursorPosition(1, 5);
-            Console.WriteLine(new String(' ', Console.BufferWidth));
+            Console.Write("Välj column för Vat: ");
+            Console.SetCursorPosition(1, 4);
+            Console.WriteLine("Välj alternativ column för landskod (om det finns):");
             Console.SetCursorPosition(21, 3);
-            var column = Console.ReadLine();
+            var column = Console.ReadLine().ToUpper();
+            Console.SetCursorPosition(21, 3);
+            Console.WriteLine(column);
+            Console.SetCursorPosition(52, 4);
+            var countryCode = Console.ReadLine().ToUpper();
+            Console.SetCursorPosition(52, 4);
+            Console.WriteLine(countryCode);
 
             if (string.IsNullOrEmpty(column))
                 return;
@@ -72,8 +83,14 @@ namespace SupplierCompilation.SONSAB.UI
             }
             catch { }
 
-            Console.SetCursorPosition(1, 5);
-            Console.WriteLine("Du valde kolumn " + column.ToUpper() + ", tryck Enter för att processa filen eller F3 för att avsluta.");
+            Console.SetCursorPosition(1, 7);
+            Console.WriteLine("Du valde kolumn " + column + " för VAT-nummer");
+
+            if (String.IsNullOrEmpty(countryCode) == false)
+            {
+                Console.SetCursorPosition(1, 8);
+                Console.WriteLine("Du valde kolumn " + countryCode + " för alternativ landskod.");
+            }
 
             var input = Console.ReadKey();
 
@@ -82,6 +99,7 @@ namespace SupplierCompilation.SONSAB.UI
                 Console.WriteLine("Running service...");
 
                 _appService.SetColumn(column);
+                _appService.AlternativeCountryCode(countryCode);
                 try
                 {
                     _appService.ProcessFile(@"c:\tmp\FT.lev.xlsx");

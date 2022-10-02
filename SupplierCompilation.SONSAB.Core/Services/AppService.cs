@@ -6,6 +6,7 @@ namespace SupplierCompilation.SONSAB.Core.Services
 {
     public class AppService : IAppService
     {
+        private string alternativeCountryCode = String.Empty;
         private string column = String.Empty;
         private readonly Application excel;
         private readonly WebService _webService;
@@ -46,12 +47,18 @@ namespace SupplierCompilation.SONSAB.Core.Services
             columns.Add(secondAddressColumn);
             SetTitles(workBook, worksheet, columns);
 
-
-
-
             Range cells = worksheet.Range[$"{column}1:{column}{lastUsedRow}"];
 
+            Range altCountryCode;
+
+            if(String.IsNullOrEmpty(alternativeCountryCode) == false)
+            {
+                altCountryCode = worksheet.Range[$"{alternativeCountryCode}1:{column}{alternativeCountryCode}"];
+            }
+
             Console.Clear();
+            Console.SetCursorPosition(0, 1);
+            Console.WriteLine("========== Sonsab Supplier Compilator 1.0 ==========");
 
             for (int i = 2; i < lastUsedRow + 1; i++)
             {
@@ -131,6 +138,11 @@ namespace SupplierCompilation.SONSAB.Core.Services
         public void SetColumn(string column)
         {
             this.column = column;
+        }
+
+        public void AlternativeCountryCode(string countryCode)
+        {
+            this.alternativeCountryCode = countryCode;
         }
     }
 }
