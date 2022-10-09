@@ -1,7 +1,5 @@
-﻿using Microsoft.Office.Interop.Excel;
-using RestSharp;
+﻿using RestSharp;
 using SupplierCompilation.SONSAB.Core.Dtos;
-using System.Net;
 using System.Xml;
 
 namespace SupplierCompilation.SONSAB.Core.Services

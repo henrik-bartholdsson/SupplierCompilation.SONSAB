@@ -27,8 +27,7 @@ namespace SupplierCompilation.SONSAB.UI
 
                 if (input.Key == ConsoleKey.D2)
                 {
-                    Console.WriteLine("Not implemented yet... Press Enter to continue");
-                    Console.Read();
+                    PrintTheredMenu();
                 }
 
                 if (input.Key == ConsoleKey.F3)
@@ -47,9 +46,9 @@ namespace SupplierCompilation.SONSAB.UI
             Console.SetCursorPosition(0, 1);
             Console.WriteLine("========== Sonsab Supplier Compilator 1.0 ==========");
             Console.SetCursorPosition(1, 3);
-            Console.WriteLine("1. Processa Fil");
+            Console.WriteLine("1. Processa Fil VAT");
             Console.SetCursorPosition(1, 5);
-            Console.WriteLine("2. Fråga enskilt Vat nr");
+            Console.WriteLine("2. Processa Fil Org.nr");
             Console.SetCursorPosition(1, 25);
             Console.WriteLine("[F3] för att avsluta");
             Console.SetCursorPosition(27, 25);
@@ -133,7 +132,7 @@ namespace SupplierCompilation.SONSAB.UI
                 
                 try
                 {
-                    _appService.ProcessFile("supplier.xlsx");
+                    _appService.ProcessVatFile("supplier.xlsx");
                 }
                 catch (Exception ex)
                 {
@@ -146,6 +145,86 @@ namespace SupplierCompilation.SONSAB.UI
                 return;
 
             if(input.Key == ConsoleKey.F6)
+            {
+                HelpSection();
+            }
+        }
+
+        private void PrintTheredMenu()
+        {
+            Console.Clear();
+            Console.SetCursorPosition(0, 1);
+            Console.WriteLine("========== Sonsab Supplier Compilator 1.0 ==========");
+            Console.SetCursorPosition(1, 25);
+            Console.WriteLine("[F3] för att avsluta");
+            Console.SetCursorPosition(1, 3);
+            Console.Write("Välj column för org.nr: ");
+            Console.SetCursorPosition(1, 4);
+            Console.WriteLine("Välj alternativ column för landskod (om det finns):");
+            Console.SetCursorPosition(25, 3);
+            var column = Console.ReadLine().ToUpper();
+            Console.SetCursorPosition(21, 3);
+            Console.WriteLine(column);
+            Console.SetCursorPosition(52, 4);
+            var countryCode = Console.ReadLine().ToUpper();
+            Console.SetCursorPosition(52, 4);
+            Console.WriteLine(countryCode);
+
+            if (string.IsNullOrEmpty(column))
+                return;
+
+            try
+            {
+                int a = int.Parse(column);
+                return;
+            }
+            catch { }
+
+            Console.SetCursorPosition(1, 7);
+            Console.WriteLine("Du valde kolumn " + column + " för org.nr");
+
+            if (String.IsNullOrEmpty(countryCode) == false)
+            {
+                Console.SetCursorPosition(1, 8);
+                Console.WriteLine("Du valde kolumn " + countryCode + " för alternativ landskod.");
+            }
+
+            Console.SetCursorPosition(1, 10);
+            Console.WriteLine("Tryck Enter för att starta körningen, eller F3 för att återgå.");
+
+            var input = Console.ReadKey();
+
+            if (input.Key == ConsoleKey.Enter)
+            {
+                if (!File.Exists("supplier.xlsx"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(" Kan ej hitta fil!");
+                    Console.ResetColor();
+                    Console.WriteLine(" Tryck enter för att börja om.");
+                    Console.ReadKey();
+                    return;
+                }
+                Console.WriteLine("Running service...");
+
+                _appService.SetColumn(column);
+                _appService.AlternativeCountryCode(countryCode);
+
+                try
+                {
+                    _appService.ProcessOrgNrFile("supplier.xlsx");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+                return;
+            }
+
+            if (input.Key == ConsoleKey.F3)
+                return;
+
+            if (input.Key == ConsoleKey.F6)
             {
                 HelpSection();
             }

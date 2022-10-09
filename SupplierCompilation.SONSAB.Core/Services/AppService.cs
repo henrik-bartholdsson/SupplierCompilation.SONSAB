@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Interop.Excel;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Range = Microsoft.Office.Interop.Excel.Range;
 
@@ -17,7 +18,7 @@ namespace SupplierCompilation.SONSAB.Core.Services
             _webService = new WebService();
         }
 
-        public void ProcessFile(string filePath)
+        public void ProcessVatFile(string filePath)
         {
             string? vatCc = String.Empty;
             string? vatNumber = String.Empty;
@@ -116,6 +117,111 @@ namespace SupplierCompilation.SONSAB.Core.Services
                 workBook.Save();
             }
 
+            Marshal.ReleaseComObject(worksheet);
+            workBook.Close();
+        }
+
+
+
+
+        public void ProcessOrgNrFile(string filePath)
+        {
+            string? orgNrCc = String.Empty;
+            string? orgNrNumber = String.Empty;
+
+            if (String.IsNullOrEmpty(column))
+            {
+                throw new Exception("Error, no column selected.");
+            }
+            if (String.IsNullOrEmpty(filePath))
+            {
+                throw new Exception("Error, file not found. Path: " + filePath);
+            }
+
+            var applicationPath = Directory.GetCurrentDirectory();
+
+            var workBook = excel.Workbooks.Open(applicationPath + "\\" + filePath);
+            var worksheet = workBook.Worksheets[1];
+
+            var lastUsedRow = GetLastRow(worksheet);
+            string orgNrColumn = GetLastColumn(worksheet, 1);
+            string nameColumn = GetLastColumn(worksheet, 2);
+            string addressColumn = GetLastColumn(worksheet, 3);
+            string secondAddressColumn = GetLastColumn(worksheet, 4);
+
+            List<string> columns = new List<string>();
+            columns.Add(orgNrColumn);
+            columns.Add(nameColumn);
+            columns.Add(addressColumn);
+            columns.Add(secondAddressColumn);
+            SetTitles(workBook, worksheet, columns);
+
+            Range cells = worksheet.Range[$"{column}1:{column}{lastUsedRow}"];
+
+
+
+            Console.Clear();
+            Console.SetCursorPosition(0, 1);
+            Console.WriteLine("========== Sonsab Supplier Compilator 1.0 ==========");
+
+            for (int i = 2; i < lastUsedRow + 1; i++)
+            {
+                string cellValue = cells[i].Value.ToString();
+                orgNrNumber = Regex.Replace(cellValue, @"[^0-9]", "");
+                orgNrCc = Regex.Replace(cellValue, @"[^A-Z]", "");
+
+                Console.SetCursorPosition(1, 15);
+                Console.Write($"Rad {i} av {lastUsedRow}   ");
+
+                Range orgNrCell = worksheet.Range[$"{orgNrColumn}{i}:{orgNrColumn}{i}"];
+                Range nameCell = worksheet.Range[$"{nameColumn}{i}:{nameColumn}{i}"];
+                Range addressCell = worksheet.Range[$"{addressColumn}{i}:{addressColumn}{i}"];
+
+                if (String.IsNullOrEmpty(orgNrNumber) == false)
+                {
+                    if (String.IsNullOrEmpty(orgNrCc) == false)
+                    {
+                        var resp = _webService.SendRequest(orgNrCc, orgNrNumber + "01").Result;
+
+                        if (resp.IsValid != "false")
+                        {
+                            orgNrCell.Value = resp.ContryCode + resp.VatNumber;
+                            nameCell.Value = resp.Name;
+                            addressCell.Value = resp.Address;
+                            workBook.Save();
+                            continue;
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(alternativeCountryCode) == false)
+                    {
+                        //Range altCountryCode;
+                        //altCountryCode = worksheet.Range[$"{alternativeCountryCode}{i}:{alternativeCountryCode}{i}"];
+                        var altCc = worksheet.Range[$"{alternativeCountryCode}{i}:{alternativeCountryCode}{i}"].Value;
+
+                        if (orgNrCc != altCc)
+                        {
+                            var resp = _webService.SendRequest(altCc, orgNrNumber + "01").Result;
+
+                            if (resp.IsValid != "false")
+                            {
+                                orgNrCell.Value = resp.ContryCode + resp.VatNumber;
+                                nameCell.Value = resp.Name;
+                                addressCell.Value = resp.Address;
+                                continue;
+                            }
+                        }
+                    }
+
+                    orgNrCell.Value = new String("invalid Org.nr");
+                    continue;
+                }
+
+                orgNrCell.Value = new String("no Org.nr");
+                workBook.Save();
+            }
+
+            Marshal.ReleaseComObject(worksheet);
             workBook.Close();
         }
 

@@ -2,7 +2,7 @@
 {
     public interface IAppService
     {
-        public void ProcessFile(string filePath);
+        public void ProcessVatFile(string filePath);
         public void SetColumn(string column);
 
     }
