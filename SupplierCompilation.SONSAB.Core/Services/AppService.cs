@@ -208,12 +208,14 @@ namespace SupplierCompilation.SONSAB.Core.Services
                                 orgNrCell.Value = resp.ContryCode + resp.VatNumber;
                                 nameCell.Value = resp.Name;
                                 addressCell.Value = resp.Address;
+                                workBook.Save();
                                 continue;
                             }
                         }
                     }
 
-                    orgNrCell.Value = new String("invalid Org.nr");
+                    orgNrCell.Value = new String("invalid VAT");
+                    workBook.Save();
                     continue;
                 }
 
