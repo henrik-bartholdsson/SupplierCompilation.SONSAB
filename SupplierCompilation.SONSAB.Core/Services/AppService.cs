@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Interop.Excel;
+using SupplierCompilation.SONSAB.Core.Dtos;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Range = Microsoft.Office.Interop.Excel.Range;
@@ -144,12 +145,16 @@ namespace SupplierCompilation.SONSAB.Core.Services
             var worksheet = workBook.Worksheets[1];
 
             var lastUsedRow = GetLastRow(worksheet);
-            string orgNrColumn = GetLastColumn(worksheet, 1);
-            string nameColumn = GetLastColumn(worksheet, 2);
-            string addressColumn = GetLastColumn(worksheet, 3);
-            string secondAddressColumn = GetLastColumn(worksheet, 4);
+            string postnumberColumn = GetLastColumn(worksheet, 1);
+            string countyColumn = GetLastColumn(worksheet, 2);
+            string orgNrColumn = GetLastColumn(worksheet, 3);
+            string nameColumn = GetLastColumn(worksheet, 4);
+            string addressColumn = GetLastColumn(worksheet, 5);
+            string secondAddressColumn = GetLastColumn(worksheet, 6);
 
             List<string> columns = new List<string>();
+            columns.Add(postnumberColumn);
+            columns.Add(countyColumn);
             columns.Add(orgNrColumn);
             columns.Add(nameColumn);
             columns.Add(addressColumn);
@@ -173,6 +178,8 @@ namespace SupplierCompilation.SONSAB.Core.Services
                 Console.SetCursorPosition(1, 15);
                 Console.Write($"Rad {i} av {lastUsedRow}   ");
 
+                Range postNumberCell = worksheet.Range[$"{postnumberColumn}{i}:{postnumberColumn}{i}"];
+                Range countyCell = worksheet.Range[$"{countyColumn}{i}:{countyColumn}{i}"];
                 Range orgNrCell = worksheet.Range[$"{orgNrColumn}{i}:{orgNrColumn}{i}"];
                 Range nameCell = worksheet.Range[$"{nameColumn}{i}:{nameColumn}{i}"];
                 Range addressCell = worksheet.Range[$"{addressColumn}{i}:{addressColumn}{i}"];
@@ -181,13 +188,16 @@ namespace SupplierCompilation.SONSAB.Core.Services
                 {
                     if (String.IsNullOrEmpty(orgNrCc) == false)
                     {
-                        var resp = _webService.SendRequest(orgNrCc, orgNrNumber + "01").Result;
+                        CompanyInfoResponseDto resp = _webService.SendRequest(orgNrCc, orgNrNumber + "01").Result;
+                        SortAddressInfo(ref resp);
 
                         if (resp.IsValid != "false")
                         {
+                            postNumberCell.Value = resp.PostCode;
+                            countyCell.Value = resp.County;
                             orgNrCell.Value = resp.ContryCode + resp.VatNumber;
                             nameCell.Value = resp.Name;
-                            addressCell.Value = resp.Address;
+                            addressCell.Value = resp.Address1;
                             workBook.Save();
                             continue;
                         }
@@ -201,19 +211,24 @@ namespace SupplierCompilation.SONSAB.Core.Services
 
                         if (orgNrCc != altCc)
                         {
-                            var resp = _webService.SendRequest(altCc, orgNrNumber + "01").Result;
+                            CompanyInfoResponseDto resp = _webService.SendRequest(altCc, orgNrNumber + "01").Result;
+                            SortAddressInfo(ref resp);
 
                             if (resp.IsValid != "false")
                             {
+                                postNumberCell.Value = resp.PostCode;
+                                countyCell.Value = resp.County;
                                 orgNrCell.Value = resp.ContryCode + resp.VatNumber;
                                 nameCell.Value = resp.Name;
-                                addressCell.Value = resp.Address;
+                                addressCell.Value = resp.Address1;
+                                workBook.Save();
                                 continue;
                             }
                         }
                     }
 
                     orgNrCell.Value = new String("invalid Org.nr");
+                    workBook.Save();
                     continue;
                 }
 
@@ -254,13 +269,19 @@ namespace SupplierCompilation.SONSAB.Core.Services
 
         private void SetTitles(Workbook workBook, dynamic? worksheet, List<string> columns)
         {
-            Range vatTitle = worksheet.Range[$"{columns[0]}{1}:{columns[0]}{1}"];
-            Range nameTitle = worksheet.Range[$"{columns[1]}{1}:{columns[1]}{1}"];
-            Range adressTitle = worksheet.Range[$"{columns[2]}{1}:{columns[2]}{1}"];
+            Range postNumber = worksheet.Range[$"{columns[0]}{1}:{columns[0]}{1}"];
+            Range countyTitle = worksheet.Range[$"{columns[1]}{1}:{columns[1]}{1}"];
+            Range vatTitle = worksheet.Range[$"{columns[2]}{1}:{columns[2]}{1}"];
+            Range nameTitle = worksheet.Range[$"{columns[3]}{1}:{columns[3]}{1}"];
+            Range adressTitle = worksheet.Range[$"{columns[4]}{1}:{columns[4]}{1}"];
 
             vatTitle.Value = "New Vat number";
             nameTitle.Value = "New Company Name";
             adressTitle.Value = "New Address";
+            postNumber.Value = "New Post number";
+            countyTitle.Value = "New County";
+
+
             workBook.Save();
         }
 
@@ -272,6 +293,21 @@ namespace SupplierCompilation.SONSAB.Core.Services
         public void AlternativeCountryCode(string countryCode)
         {
             this.alternativeCountryCode = countryCode;
+        }
+
+        private void SortAddressInfo(ref CompanyInfoResponseDto resp)
+        {
+            if(resp != null)
+            {
+                if (resp.Address != null)
+                {
+                    var addressData = resp.Address.Split("\n");
+
+                    resp.PostCode = Regex.Replace(addressData[addressData.Length - 1], @"[^0-9\s]", "").Trim();
+                    resp.County = Regex.Replace(addressData[addressData.Length - 1], @"[^a-zA-ZåäöÅÄÖ\s]", "").Trim();
+                    resp.Address1 = addressData[0];
+                }
+            }
         }
     }
 }

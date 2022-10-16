@@ -163,11 +163,11 @@ namespace SupplierCompilation.SONSAB.UI
             Console.WriteLine("Välj alternativ column för landskod (om det finns):");
             Console.SetCursorPosition(25, 3);
             var column = Console.ReadLine().ToUpper();
-            Console.SetCursorPosition(21, 3);
+            Console.SetCursorPosition(25, 3);
             Console.WriteLine(column);
-            Console.SetCursorPosition(52, 4);
+            Console.SetCursorPosition(53, 4);
             var countryCode = Console.ReadLine().ToUpper();
-            Console.SetCursorPosition(52, 4);
+            Console.SetCursorPosition(53, 4);
             Console.WriteLine(countryCode);
 
             if (string.IsNullOrEmpty(column))
